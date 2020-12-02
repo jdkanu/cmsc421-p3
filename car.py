@@ -10,7 +10,8 @@ from utils import angle_bw
 CAR_CIRCLE_RADIUS = 9
 CAR_CIRCLE_DIST = 1.2 * CAR_CIRCLE_RADIUS
 STEER_SPEED = 1.0
-MAX_SENSOR_RANGE = 50
+MAX_SENSOR_RANGE = 200
+SENSOR_STD = 2.0
 
 class CarCircle:
     def __init__(self, x, y, radius):
@@ -37,7 +38,7 @@ class Car:
         self.circle_front = CarCircle(x + CAR_CIRCLE_DIST, y, CAR_CIRCLE_DIST)
         self.circle_middle = CarCircle(x,y,CAR_CIRCLE_DIST)
         self.circle_rear = CarCircle(x - CAR_CIRCLE_DIST, y, CAR_CIRCLE_DIST)
-        self.sensor_std = 0#2.0
+        self.sensor_std = SENSOR_STD
         self.sensor_dists = np.array([0,0,0,0])
         self.gps_noise_var = 5.0
         self.gps_measurement = None

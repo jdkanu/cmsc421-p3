@@ -5,9 +5,9 @@ import numpy as np
 import math
 import bisect
 import copy
-from utils import add_noise
+from utils import add_noise as utils_add_noise
 
-NUM_PARTICLES = 80
+NUM_PARTICLES = 50
 
 class Particle:
     """
@@ -25,7 +25,7 @@ class Particle:
         self.orient = orient
         self.weight = weight
     
-    def add_noise(self, std_pos=6.0, std_orient=0.06):
+    def add_noise(self, std_pos=1.0, std_orient=1.0):
         """
         Adds noise to pos and orient
             this is useful when sampling from a distribution with mean at
@@ -33,11 +33,11 @@ class Particle:
         std_pos: standard deviation for noise in position
         std_orient: standard deviation for noise in orientation
         """
-        self.pos[0] = add_noise(x=self.pos[0], std=std_pos)
-        self.pos[1] = add_noise(x=self.pos[1], std=std_pos)
+        self.pos[0] = utils_add_noise(x=self.pos[0], std=std_pos)
+        self.pos[1] = utils_add_noise(x=self.pos[1], std=std_pos)
         while True:
-            self.orient[0] = add_noise(x=self.orient[0], std=std_orient)
-            self.orient[1] = add_noise(x=self.orient[1], std=std_orient)
+            self.orient[0] = utils_add_noise(x=self.orient[0], std=std_orient)
+            self.orient[1] = utils_add_noise(x=self.orient[1], std=std_orient)
             if np.linalg.norm(self.orient) >= 1e-8:
                 break
         self.orient = self.orient / np.linalg.norm(self.orient)
@@ -45,9 +45,6 @@ class Particle:
 class ParticleFilter:
     """
     Particle filter for estimating position and orientation (pose) in a rectangular map, from sensor readings
-
-    Position is a vector of the form (x,y)
-    Orientation is a unit vector (i.e. norm is 1) of the form (ux,uy)
     """
 
     def __init__(self, num_particles, minx, maxx, miny, maxy):
@@ -75,6 +72,7 @@ class ParticleFilter:
 
         # BEGIN_YOUR_CODE ######################################################
         raise NotImplementedError
+        
         # END_YOUR_CODE ########################################################
 
         return particles
@@ -121,11 +119,11 @@ class ParticleFilter:
 
         # BEGIN_YOUR_CODE ######################################################
         raise NotImplementedError
-        
         #Hint: when computing the weights of each particle, you will probably want
         # to use compute_prenorm_weight to compute an unnormalized weight for each
         # particle individually, and then normalize the weights of all the particles
         # using normalize_weights
+
         
         # END_YOUR_CODE ########################################################
 
@@ -146,9 +144,7 @@ class ParticleFilter:
         weight = None
         # BEGIN_YOUR_CODE ######################################################
         raise NotImplementedError
-        
         #Hint: use the weight_gaussian_kernel method
-
         # END_YOUR_CODE ########################################################
         return weight
 
@@ -165,9 +161,9 @@ class ParticleFilter:
         new_particle = None
         # BEGIN_YOUR_CODE ######################################################
         raise NotImplementedError
-        
         #Hint: rotate the orientation by delta_angle, and then move in that
-        # direction at the given speed over 1 unit of time
+        # direction at the given speed over 1 unit of time. You will need to add
+        # noise at the end to simulate stochasticity in dynamics
         
         # END_YOUR_CODE ########################################################
         return new_particle
@@ -251,20 +247,18 @@ class WeightedDistribution(object):
 
 def estimate_pose(particles):
     """ Estimates the position and orientation based on the given set of particles """
-    x_accum = 0
-    y_accum = 0
-    angle_accum = 0
+    pos_accum = np.array([0,0])
+    orient_accum = np.array([0,0])
     weight_accum = 0.0
     for p in particles:
         weight_accum += p.weight
-        x_accum += p.pos[0] * p.weight
-        y_accum += p.pos[1] * p.weight
-        angle = int(math.degrees(math.atan2(-p.orient[1], p.orient[0])))
-        angle_accum += angle * p.weight
+        pos_accum = pos_accum + p.pos * p.weight
+        orient_accum = orient_accum + p.orient * p.weight
     if weight_accum != 0:
-        x_est = x_accum / weight_accum
-        y_est = y_accum / weight_accum
-        angle_est = int(angle_accum / weight_accum)
+        x_est = pos_accum[0] / weight_accum
+        y_est = pos_accum[1] / weight_accum
+        orient_est = orient_accum / weight_accum
+        angle_est = int(math.degrees(math.atan2(-orient_est[1], orient_est[0])))
         return x_est, y_est, angle_est
     else:
         raise ValueError

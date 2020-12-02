@@ -18,7 +18,7 @@ class DataPoint:
 class BayesianNetwork:
     def __init__(self):
         data = pickle.load(open("data/bn_data.p","rb"))
-        
         # BEGIN_YOUR_CODE ######################################################
         raise NotImplementedError
+        
         # END_YOUR_CODE ########################################################

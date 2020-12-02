@@ -19,7 +19,8 @@ class App(Tk):
     def __init__(self):
         Tk.__init__(self, None, baseName=None,
                     className='Tk', useTk=1, sync=0, use=None)
-        self.draw_extra = False
+        self.draw_occupancy = False
+        self.draw_particles = False
         self.__canvas = Canvas(self, width=WORLD_WIDTH, height=WORLD_HEIGHT)
         self.__canvas.pack()
         self.__canvas.configure(background="red")
@@ -76,7 +77,11 @@ class App(Tk):
                 self.count_since = 0
         if "o" in self.history_chars:
             if self.count_since >= self.max_count_since:
-                self.draw_extra = not self.draw_extra
+                self.draw_occupancy = not self.draw_occupancy
+                self.count_since = 0
+        if "i" in self.history_chars:
+            if self.count_since >= self.max_count_since:
+                self.draw_particles = not self.draw_particles
                 self.count_since = 0
     
     def __loop(self):
@@ -100,7 +105,7 @@ class App(Tk):
         self.__canvas.create_image(car.pos[0], car.pos[1], image=self.car_blue_imgs[car_angle + 180])
 
         # draw grid and occupancy
-        if self.draw_extra:
+        if self.draw_occupancy:
             for i in range(80):
                 self.__canvas.create_line(
                     0, 10 * i, 1400, 10 * i, fill="gray")
@@ -114,15 +119,14 @@ class App(Tk):
 
         sensor_color = "red"
         sensor_width = 2
-        if self.draw_extra:
+        if self.draw_occupancy:
             dists = self.simulator.car.sensor_dists
             self.__canvas.create_line(car.pos[0], car.pos[1], car.pos[0], car.pos[1]-dists[0], fill=sensor_color, width=sensor_width)
             self.__canvas.create_line(car.pos[0], car.pos[1], car.pos[0], car.pos[1]+dists[1], fill=sensor_color, width=sensor_width)
             self.__canvas.create_line(car.pos[0], car.pos[1], car.pos[0]-dists[2], car.pos[1], fill=sensor_color, width=sensor_width)
             self.__canvas.create_line(car.pos[0], car.pos[1], car.pos[0]+dists[3], car.pos[1], fill=sensor_color, width=sensor_width)
         
-        draw_particles = self.draw_extra
-        if draw_particles:
+        if self.draw_particles:
             if self.simulator.do_particle_filtering:
                 for p in self.simulator.particle_filter.particles:
                     self.__canvas.create_oval(p.pos[0]-2,p.pos[1]-2,p.pos[0]+2,p.pos[1]+2,fill="red")
