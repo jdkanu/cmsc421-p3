@@ -1,3 +1,5 @@
+""" Bayesian networks """
+
 from probability import BayesNet, enumeration_ask, elimination_ask, rejection_sampling, likelihood_weighting, gibbs_ask
 from aima_utils import print_table
 import pickle
@@ -15,8 +17,8 @@ class DataPoint:
 
 class BayesianNetwork:
     def __init__(self):
-        dps = pickle.load(open("data/bn_data.p","rb"))
-    
-        # BEGIN_YOUR_CODE
+        data = pickle.load(open("data/bn_data.p","rb"))
+        
+        # BEGIN_YOUR_CODE ######################################################
         raise NotImplementedError
-        # END_YOUR_CODE
+        # END_YOUR_CODE ########################################################
