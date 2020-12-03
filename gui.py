@@ -165,10 +165,6 @@ def main():
     parser.add_argument("-gw", "--gps_noise_width", default=20, type=float, help='Width of uniformly random noise for GPS measurement (Kalman filter)')
     args = parser.parse_args()
 
-    if args.help:
-        parser.print_help()
-        sys.exit(0)
-
     max_sensor_range = args.max_sensor_range
     sensor_std = args.sensor_noise_std
     num_particles = args.num_particles
