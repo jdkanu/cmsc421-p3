@@ -1,7 +1,6 @@
 """ Bayesian networks """
 
 from probability import BayesNet, enumeration_ask, elimination_ask, rejection_sampling, likelihood_weighting, gibbs_ask
-from aima_utils import print_table
 from timeit import timeit, repeat
 import pickle
 import numpy as np
@@ -51,4 +50,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

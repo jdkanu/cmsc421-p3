@@ -8,7 +8,7 @@ import sys
 import argparse
 import math
 from tkinter import *
-from PIL import Image, ImageTk
+from PIL import ImageTk
 from utils import load_image
 from simulator import Simulator, WORLD_WIDTH, WORLD_HEIGHT
 from racetrack import RaceTrack, Contour, Horizontals, load_racetrack
@@ -23,7 +23,7 @@ class App(Tk):
         Tk.__init__(self, None, baseName=None,
                     className='Tk', useTk=1, sync=0, use=None)
         self.draw_occupancy = False
-        self.draw_particles = False
+        self.draw_particles = True
         self.__canvas = Canvas(self, width=WORLD_WIDTH, height=WORLD_HEIGHT)
         self.__canvas.pack()
         self.__canvas.configure(background="red")

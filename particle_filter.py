@@ -121,6 +121,7 @@ class ParticleFilter:
         # particle individually, and then normalize the weights of all the particles
         # using normalize_weights
 
+        
         # END_YOUR_CODE ########################################################
 
         return new_particles
@@ -142,6 +143,7 @@ class ParticleFilter:
         raise NotImplementedError
         #Hint: use the weight_gaussian_kernel method
 
+        
         # END_YOUR_CODE ########################################################
         return weight
 
@@ -161,6 +163,7 @@ class ParticleFilter:
         #Hint: rotate the orientation by delta_angle, and then move in that
         # direction at the given speed over 1 unit of time. You will need to add
         # noise at the end to simulate stochasticity in dynamics
+        
         
         # END_YOUR_CODE ########################################################
         return new_particle
