@@ -10,8 +10,6 @@ from utils import angle_bw
 CAR_CIRCLE_RADIUS = 9
 CAR_CIRCLE_DIST = 1.2 * CAR_CIRCLE_RADIUS
 STEER_SPEED = 1.0
-MAX_SENSOR_RANGE = 200
-SENSOR_STD = 2.0
 
 class CarCircle:
     def __init__(self, x, y, radius):
@@ -19,7 +17,7 @@ class CarCircle:
         self.radius = radius
 
 class Car:
-    def __init__(self, x=750.0, y=750.0, vel=np.array([0.0,0.0]), orient=np.array([1.0,0.0]), noisy=False):
+    def __init__(self, x=750.0, y=750.0, vel=np.array([0.0,0.0]), orient=np.array([1.0,0.0]), max_sensor_range=40, sensor_std=2.0, gps_noise_var=10.0, gps_noise_width=20):
         self.pos = np.array([x,y])
         self.vel = vel
         self.old_vel = self.vel
@@ -38,17 +36,24 @@ class Car:
         self.circle_front = CarCircle(x + CAR_CIRCLE_DIST, y, CAR_CIRCLE_DIST)
         self.circle_middle = CarCircle(x,y,CAR_CIRCLE_DIST)
         self.circle_rear = CarCircle(x - CAR_CIRCLE_DIST, y, CAR_CIRCLE_DIST)
-        self.sensor_std = SENSOR_STD
+        self.max_sensor_range = max_sensor_range
+        self.sensor_std = sensor_std
         self.sensor_dists = np.array([0,0,0,0])
-        self.gps_noise_var = 5.0
+        self.gps_noise_var = gps_noise_var
+        self.gps_noise_width = gps_noise_width
         self.gps_measurement = None
     
     def measure_sensor_dists(self, racetrack):
-        self.sensor_dists = racetrack.read_distances(self.pos[0], self.pos[1], noisy=True, std=self.sensor_std)
+        self.sensor_dists = racetrack.read_distances(self.pos[0], self.pos[1], self.max_sensor_range, noisy=True, std=self.sensor_std)
         return self.sensor_dists
     
-    def measure_gps(self):
-        self.gps_measurement = self.pos + np.random.normal(0,self.gps_noise_var,2)
+    def measure_gps(self, noise_dist="gaussian"):
+        if noise_dist == "gaussian":
+            self.gps_measurement = self.pos + np.random.multivariate_normal([0,0],self.gps_noise_var*np.eye(2))
+        elif noise_dist == "uniform":
+            self.gps_measurement = self.pos + np.random.uniform(-self.gps_noise_width / 2.0, self.gps_noise_width / 2.0, 2)
+        else:
+            raise ValueError
         return self.gps_measurement
     
     def throttle_press(self):

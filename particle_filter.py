@@ -2,12 +2,9 @@
 
 import random
 import numpy as np
-import math
 import bisect
 import copy
 from utils import add_noise as utils_add_noise
-
-NUM_PARTICLES = 50
 
 class Particle:
     """
@@ -77,7 +74,7 @@ class ParticleFilter:
 
         return particles
     
-    def filtering_and_estimation(self, sensor, sensor_std, evidence, delta_angle, speed):
+    def filtering_and_estimation(self, sensor, max_sensor_range, sensor_std, evidence, delta_angle, speed):
         """
         Performs particle filtering and estimation of position and orientation
         sensor: function that returns the sensor readings for an arbitrary pose in the map
@@ -85,22 +82,22 @@ class ParticleFilter:
         evidence: sensor readings from car
         delta_angle: change in car's angle from the previous timestep
         speed: current speed of the car
-        returns x_est (estimated x-component of position), y_est (estimated y-component of position), angle_est (estimated angle)
+        returns x_est (estimated x-component of position), y_est (estimated y-component of position), orient_est (estimated orientation)
         """
 
         # run filtering step to update particles
-        self.particles = self.filtering(sensor, sensor_std, evidence, delta_angle, speed)
+        self.particles = self.filtering(sensor, max_sensor_range, sensor_std, evidence, delta_angle, speed)
 
         # fix the particles in case some are outside the bounds of the region
         for p in self.particles:
             self.fix_particle(p)
 
         # compute estimated position, angle
-        x_est, y_est, angle_est = estimate_pose(self.particles)
+        x_est, y_est, orient_est = estimate_pose(self.particles)
 
-        return x_est, y_est, angle_est
+        return x_est, y_est, orient_est
     
-    def filtering(self, sensor, sensor_std, evidence, delta_angle, speed):
+    def filtering(self, sensor, max_sensor_range, sensor_std, evidence, delta_angle, speed):
         """
         Performs one step of particle filtering according to particle-filtering pseudocode in AIMA.
         particles: list of particles from previous timestep
@@ -124,12 +121,11 @@ class ParticleFilter:
         # particle individually, and then normalize the weights of all the particles
         # using normalize_weights
 
-        
         # END_YOUR_CODE ########################################################
 
         return new_particles
     
-    def compute_prenorm_weight(self, particle, sensor, sensor_std, evidence):
+    def compute_prenorm_weight(self, particle, sensor, max_sensor_range, sensor_std, evidence):
         """
         Computes the pre-normalization weight of a particle given evidence, i.e. such
         that normalizing the pre-norm weights for all particles gives your
@@ -145,6 +141,7 @@ class ParticleFilter:
         # BEGIN_YOUR_CODE ######################################################
         raise NotImplementedError
         #Hint: use the weight_gaussian_kernel method
+
         # END_YOUR_CODE ########################################################
         return weight
 
@@ -258,7 +255,6 @@ def estimate_pose(particles):
         x_est = pos_accum[0] / weight_accum
         y_est = pos_accum[1] / weight_accum
         orient_est = orient_accum / weight_accum
-        angle_est = int(math.degrees(math.atan2(-orient_est[1], orient_est[0])))
-        return x_est, y_est, angle_est
+        return x_est, y_est, orient_est
     else:
         raise ValueError
