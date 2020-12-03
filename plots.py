@@ -44,12 +44,12 @@ def main():
             gps_noise_var = args.gps_noise_var
             sim = Simulator(gps_noise_var=gps_noise_var)
             sim.gps_noise_dist = gps_noise_dist
-            print("Running Kalman filtering with\n    GPS noise dist = {}\n    GPS noise var = {}".format(gps_noise_dist, gps_noise_var))
+            print("Running Kalman filtering with\n    GPS noise dist = {}\n    GPS gaussian noise var = {}".format(gps_noise_dist, gps_noise_var))
         elif gps_noise_dist == "uniform":
             gps_noise_width = args.gps_noise_width
             sim = Simulator(gps_noise_width=gps_noise_width)
             sim.gps_noise_dist = gps_noise_dist
-            print("Running Kalman filtering with\n    GPS noise dist = {}\n    GPS noise width = {}".format(gps_noise_dist, gps_noise_width))
+            print("Running Kalman filtering with\n    GPS noise dist = {}\n    GPS uniform noise width = {}".format(gps_noise_dist, gps_noise_width))
         else:
             raise ValueError
         sim.toggle_kalman()
@@ -94,7 +94,10 @@ def main():
         if args.which == "pf":
             fig.suptitle("Particle Filtering, N={}, Range={}, Noise={}".format(sim.num_particles, sim.max_sensor_range, sim.sensor_std))
         elif args.which == "kf":
-            fig.suptitle("Kalman Filtering, GPS Noise Var={}".format(sim.gps_noise_var))
+            if args.gps_noise_dist == "gaussian":
+                fig.suptitle("Kalman Filtering, GPS Noise Dist = Gaussian, GPS Noise Var = {}".format(sim.gps_noise_var))
+            elif args.gps_noise_dist == "uniform":
+                fig.suptitle("Kalman Filtering, GPS Noise Dist = Uniform, GPS Noise Width = {}".format(sim.gps_noise_width))
 
         ax0 = axs[0]
         ax1 = axs[1]
