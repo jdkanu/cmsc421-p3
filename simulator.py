@@ -56,7 +56,7 @@ class Simulator:
     
     def init_kalman(self):
         self.do_kalman_filtering = True
-        self.kalman_filter = KalmanFilter(self.car.gps_noise_var)
+        self.kalman_filter = KalmanFilter(self.car.gps_noise_var, self.gps_noise_width)
     
     def stop_kalman(self):
         self.do_kalman_filtering = False
@@ -139,6 +139,6 @@ class Simulator:
         # kalman filter
         if self.do_kalman_filtering:
             self.gps_measurement = self.car.measure_gps(noise_dist=self.gps_noise_dist)
-            self.kf_state = self.kalman_filter.get_state(self.gps_measurement)
+            self.kf_state = self.kalman_filter.predict_and_update(self.gps_measurement, self.gps_noise_dist)
         
         return True
