@@ -119,7 +119,7 @@ class ParticleFilter:
         #Hint: when computing the weights of each particle, you will probably want
         # to use compute_prenorm_weight to compute an unnormalized weight for each
         # particle individually, and then normalize the weights of all the particles
-        # using normalize_weights
+        # using normalize_weights. Use weighted_sample_w_replacement method below.
 
         
         # END_YOUR_CODE ########################################################
