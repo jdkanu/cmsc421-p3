@@ -8,13 +8,12 @@ import sys
 import argparse
 import math
 from tkinter import *
-from PIL import ImageTk
+from PIL import Image, ImageTk
 from utils import load_image
 from simulator import Simulator, WORLD_WIDTH, WORLD_HEIGHT
 from racetrack import RaceTrack, Contour, Horizontals, load_racetrack
 
 MAX_COUNT_SINCE = 5
-
 
 class App(Tk):
     TICK_RATE = 40
@@ -22,24 +21,30 @@ class App(Tk):
     def __init__(self, max_sensor_range=50, sensor_std=0.0, num_particles=50, gps_noise_var=10.0, gps_noise_width=20):
         Tk.__init__(self, None, baseName=None,
                     className='Tk', useTk=1, sync=0, use=None)
+        max_width = self.winfo_screenwidth() * 0.85
+        max_height = self.winfo_screenheight() * 0.85
+        scale_width = max_width / WORLD_WIDTH
+        scale_height = max_height / WORLD_HEIGHT
+        self.scale = min(min(scale_width, scale_height), 1.0)
+        
         self.draw_occupancy = False
         self.draw_particles = True
-        self.__canvas = Canvas(self, width=WORLD_WIDTH, height=WORLD_HEIGHT)
+        self.__canvas = Canvas(self, width=WORLD_WIDTH * self.scale, height=WORLD_HEIGHT * self.scale)
         self.__canvas.pack()
         self.__canvas.configure(background="red")
         self.title("Simulator")
         self.bind("<KeyPress>", self.keydown)
         self.bind("<KeyRelease>", self.keyup)
         self.history_chars = []
-        _, self.bg = load_image("data/track.png")
+        _, self.bg = load_image("data/track.png", self.scale)
         
-        img_car_blue, _ = load_image("data/car_blue.png")
+        img_car_blue, _ = load_image("data/car_blue.png", self.scale)
         self.car_blue_imgs = []
         for i in range(-180,180):
             imgtk = ImageTk.PhotoImage(img_car_blue.rotate(i))
             self.car_blue_imgs.append(imgtk)
 
-        img_green_arrow, _ = load_image("data/green_arrow.png")
+        img_green_arrow, _ = load_image("data/green_arrow.png", self.scale)
         self.green_arrow_imgs = []
         for i in range(-180,180):
             imgtk = ImageTk.PhotoImage(img_green_arrow.rotate(i))
@@ -110,46 +115,46 @@ class App(Tk):
         racetrack = self.simulator.racetrack
         
         car_angle = int(math.degrees(math.atan2(-car.orient[1], car.orient[0])))
-        self.__canvas.create_image(car.pos[0], car.pos[1], image=self.car_blue_imgs[car_angle + 180])
+        self.__canvas.create_image(car.pos[0] * self.scale, car.pos[1] * self.scale, image=self.car_blue_imgs[car_angle + 180])
 
         # draw grid and occupancy
         if self.draw_occupancy:
             for i in range(80):
                 self.__canvas.create_line(
-                    0, 10 * i, 1400, 10 * i, fill="gray")
+                    0, 10 * i * self.scale, 1400 * self.scale, 10 * i * self.scale, fill="gray")
             for i in range(140):
                 self.__canvas.create_line(
-                    10 * i, 0, 10 * i, 800, fill="gray")
+                    10 * i * self.scale, 0, 10 * i * self.scale, 800 * self.scale, fill="gray")
             for i in range(140):
                 for j in range(80):
                     if racetrack.occupancy[i,j] != 0:
-                        self.__canvas.create_rectangle(i * 10, j * 10, i * 10 + 10, j * 10 + 10, fill="black")
+                        self.__canvas.create_rectangle(i * 10 * self.scale, j * 10 * self.scale, (i * 10 + 10) * self.scale, (j * 10 + 10) * self.scale, fill="black")
 
         sensor_color = "red"
         sensor_width = 2
         if self.draw_occupancy:
             dists = self.simulator.car.sensor_dists
-            self.__canvas.create_line(car.pos[0], car.pos[1], car.pos[0], car.pos[1]-dists[0], fill=sensor_color, width=sensor_width)
-            self.__canvas.create_line(car.pos[0], car.pos[1], car.pos[0], car.pos[1]+dists[1], fill=sensor_color, width=sensor_width)
-            self.__canvas.create_line(car.pos[0], car.pos[1], car.pos[0]-dists[2], car.pos[1], fill=sensor_color, width=sensor_width)
-            self.__canvas.create_line(car.pos[0], car.pos[1], car.pos[0]+dists[3], car.pos[1], fill=sensor_color, width=sensor_width)
+            self.__canvas.create_line(car.pos[0] * self.scale, car.pos[1] * self.scale, car.pos[0] * self.scale, (car.pos[1]-dists[0]) * self.scale, fill=sensor_color, width=sensor_width)
+            self.__canvas.create_line(car.pos[0] * self.scale, car.pos[1] * self.scale, car.pos[0] * self.scale, (car.pos[1]+dists[1]) * self.scale, fill=sensor_color, width=sensor_width)
+            self.__canvas.create_line(car.pos[0] * self.scale, car.pos[1] * self.scale, (car.pos[0]-dists[2]) * self.scale, car.pos[1] * self.scale, fill=sensor_color, width=sensor_width)
+            self.__canvas.create_line(car.pos[0] * self.scale, car.pos[1] * self.scale, (car.pos[0]+dists[3]) * self.scale, car.pos[1] * self.scale, fill=sensor_color, width=sensor_width)
         
         if self.draw_particles:
             if self.simulator.do_particle_filtering:
                 for p in self.simulator.particle_filter.particles:
-                    self.__canvas.create_oval(p.pos[0]-2,p.pos[1]-2,p.pos[0]+2,p.pos[1]+2,fill="red")
+                    self.__canvas.create_oval((p.pos[0]-2) * self.scale,(p.pos[1]-2) * self.scale,(p.pos[0]+2) * self.scale,(p.pos[1]+2) * self.scale,fill="red")
         
         if self.simulator.do_particle_filtering:
             angle_est = int(math.degrees(math.atan2(-self.simulator.orient_est[1], self.simulator.orient_est[0])))
-            self.__canvas.create_image(self.simulator.x_est, self.simulator.y_est, image=self.green_arrow_imgs[angle_est + 180])
+            self.__canvas.create_image(self.simulator.x_est * self.scale, self.simulator.y_est * self.scale, image=self.green_arrow_imgs[angle_est + 180])
         
         if self.simulator.do_kalman_filtering:
             measx = self.simulator.car.gps_measurement[0]
             measy = self.simulator.car.gps_measurement[1]
-            self.__canvas.create_oval(measx-4,measy-4,measx+4,measy+4,fill="red")
+            self.__canvas.create_oval((measx-4) * self.scale,(measy-4) * self.scale,(measx+4) * self.scale,(measy+4) * self.scale,fill="red")
             kfx = self.simulator.kf_state[0]
             kfy = self.simulator.kf_state[1]
-            self.__canvas.create_oval(kfx-4,kfy-4,kfx+4,kfy+4,fill="lime green")
+            self.__canvas.create_oval((kfx-4) * self.scale,(kfy-4) * self.scale,(kfx+4) * self.scale,(kfy+4) * self.scale,fill="lime green")
         
         
     def mainloop(self, n=0):

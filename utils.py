@@ -20,9 +20,12 @@ def angle_bw(x, y):
 def add_noise(x, std):
     return x + np.random.normal(0, std)
 
-def load_image(path):
+def load_image(path, scale):
     try:
         img = Image.open(path)
+        new_width = int(img.width * float(scale))
+        new_height = int(img.height * float(scale))
+        img = img.resize((new_width, new_height), Image.ANTIALIAS)
         return img, ImageTk.PhotoImage(img)
     except IOError as e:
         print(e)
