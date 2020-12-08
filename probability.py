@@ -1,4 +1,6 @@
 import numpy as np
+import random
+from functools import reduce
 
 class ProbDist:
     """A discrete probability distribution. You name the random variable
@@ -395,3 +397,28 @@ def markov_blanket_sample(X, e, bn):
 def extend(s, var, val):
     """Copy dict s and extend it by setting var to val; return copy."""
     return {**s, var: val}
+
+
+def prior_sample(bn):
+    """
+    [Figure 14.13]
+    Randomly sample from bn's full joint distribution.
+    The result is a {variable: value} dict.
+    """
+    event = {}
+    for node in bn.nodes:
+        event[node.variable] = node.sample(event)
+    return event
+
+
+def probability(p):
+    """Return true with probability p."""
+    return p > random.uniform(0.0, 1.0)
+
+
+def product(numbers):
+    """Return the product of the numbers, e.g. product([2, 3, 10]) == 60"""
+    result = 1
+    for x in numbers:
+        result *= x
+    return result
