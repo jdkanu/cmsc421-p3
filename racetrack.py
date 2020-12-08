@@ -168,6 +168,15 @@ class RaceTrack:
 
     
     def read_distances(self, x, y, max_sensor_range, noisy=False, std=0):
+        """
+        Reads distances to walls from a given position, in 4 cardinal directions (up,down,left,right)
+        x: x-coordinate of position
+        y: y-coordinate of position
+        max_sensor_range: maximum distance that can be read in each of the 4 directions
+        noisy: specify whether the readings will be noisy, i.e. add noise to each of the distance measurements
+        std: standard deviation of noise distribution
+        returns numpy array of distances [up,down,left,right], of shape
+        """
         if x is np.nan or y is np.nan:
             return np.array([0,0,0,0])
         i = int(x // 10)

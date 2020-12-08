@@ -14,9 +14,9 @@ class Particle:
     def __init__(self, pos, orient, weight=1.0):
         """
         Initializes a particle
-        pos: position of the particle
-        orient: orientation of the particle
-        weight: weight of the particle
+        pos (numpy array of shape (2,)): position of the particle
+        orient (numpy array of shape (2,)): a unit vector representing the orientation, pointing in the direction the particle is heading
+        weight (float): weight of the particle
         """
         self.pos = pos
         self.orient = orient
@@ -29,6 +29,8 @@ class Particle:
             the given pos and orient
         std_pos: standard deviation for noise in position
         std_orient: standard deviation for noise in orientation
+
+        Note: orient must have unit norm
         """
         self.pos[0] = utils_add_noise(x=self.pos[0], std=std_pos)
         self.pos[1] = utils_add_noise(x=self.pos[1], std=std_pos)
@@ -63,7 +65,9 @@ class ParticleFilter:
     def initialize_particles(self):
         """
         Initialize the particles uniformly randomly within the bounds of the rectangular region
-        returns a list of Particle objects
+        returns a list of Particle objects.
+
+        See Particle class for details on Particle attributes. Keep particle weights 1.0
         """
         particles = []
 
@@ -77,10 +81,10 @@ class ParticleFilter:
     def filtering_and_estimation(self, sensor, max_sensor_range, sensor_std, evidence, delta_angle, speed):
         """
         Performs particle filtering and estimation of position and orientation
-        sensor: function that returns the sensor readings for an arbitrary pose in the map
+        sensor: function that returns the sensor readings for an arbitrary pose in the map (up,down,left,right), i.e. read_distances in racetrack.py
         sensor_std: std of car's sensor noise
-        evidence: sensor readings from car
-        delta_angle: change in car's angle from the previous timestep
+        evidence: sensor readings from car, with the same form as outputs from sensor argument. numpy array of shape (4,)
+        delta_angle: clockwise rotation of the car from the previous timestep, in radians
         speed: current speed of the car
         returns x_est (estimated x-component of position), y_est (estimated y-component of position), orient_est (estimated orientation)
         """
@@ -100,16 +104,15 @@ class ParticleFilter:
     def filtering(self, sensor, max_sensor_range, sensor_std, evidence, delta_angle, speed):
         """
         Performs one step of particle filtering according to particle-filtering pseudocode in AIMA.
-        particles: list of particles from previous timestep
-        sensor: function that returns the sensor readings for an arbitrary pose in the map
+        sensor: function that returns the sensor readings for an arbitrary pose in the map (up,down,left,right), i.e. read_distances in racetrack.py
         sensor_std: std of car's sensor noise
-        evidence: sensor readings from car
-        delta_angle: change in car's angle from the previous timestep
+        evidence: sensor readings from car, with the same form as outputs from sensor argument. numpy array of shape (4,)
+        delta_angle: clockwise rotation of the car from the previous timestep, in radians
         speed: current speed of the car
-        returns a new list of particles
+        returns a new list of Particle objects
 
         delta_angle and speed define the transition model, since they tell you how the car has moved
-        sensor_std is a parameter to the sensor model
+        sensor_std is a parameter to the sensor function
         """
 
         new_particles = []
@@ -119,7 +122,7 @@ class ParticleFilter:
         #Hint: when computing the weights of each particle, you will probably want
         # to use compute_prenorm_weight to compute an unnormalized weight for each
         # particle individually, and then normalize the weights of all the particles
-        # using normalize_weights. Use weighted_sample_w_replacement method below.
+        # using normalize_weights
 
         
         # END_YOUR_CODE ########################################################
@@ -132,11 +135,11 @@ class ParticleFilter:
         that normalizing the pre-norm weights for all particles gives your
         P(evidence|particle pose) for each particle
 
-        particle: the particle whose weight we want to compute
-        sensor: function that returns the sensor readings for an arbitrary pose in the map
+        particle: the particle (Particle object) whose weight we want to compute
+        sensor: function that returns the sensor readings for an arbitrary pose in the map (up,down,left,right), i.e. read_distances in racetrack.py
         sensor_std: std of car's sensor noise
-        evidence: sensor readings from car
-        returns the pre-norm weight of the particle
+        evidence: sensor readings from car, with the same form as outputs from sensor argument. numpy array of shape (4,)
+        returns the pre-norm weight of the particle (float)
         """
         weight = None
         # BEGIN_YOUR_CODE ######################################################
@@ -153,7 +156,7 @@ class ParticleFilter:
         model given by theta and speed.
 
         particle: the particle we want to update
-        delta_angle: the change in angle of the car from the previous timestep
+        delta_angle: the clockwise change in angle of the car from the previous timestep
         speed: the current speed of the car
         returns a new particle
         """
