@@ -85,7 +85,7 @@ class ParticleFilter:
         sensor_std: std of car's sensor noise
         evidence: sensor readings from car, with the same form as outputs from sensor argument. numpy array of shape (4,)
         delta_angle: clockwise rotation of the car from the previous timestep, in radians
-        speed: current speed of the car
+        speed: current speed of the car (distance traveled over 1 unit of time)
         returns x_est (estimated x-component of position), y_est (estimated y-component of position), orient_est (estimated orientation)
         """
 
@@ -108,7 +108,7 @@ class ParticleFilter:
         sensor_std: std of car's sensor noise
         evidence: sensor readings from car, with the same form as outputs from sensor argument. numpy array of shape (4,)
         delta_angle: clockwise rotation of the car from the previous timestep, in radians
-        speed: current speed of the car
+        speed: current speed of the car (distance traveled over 1 unit of time)
         returns a new list of Particle objects
 
         delta_angle and speed define the transition model, since they tell you how the car has moved
@@ -157,7 +157,7 @@ class ParticleFilter:
 
         particle: the particle we want to update
         delta_angle: the clockwise change in angle of the car from the previous timestep
-        speed: the current speed of the car
+        speed: the current speed of the car (distance traveled over 1 unit of time)
         returns a new particle
         """
         new_particle = None
