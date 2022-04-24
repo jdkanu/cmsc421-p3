@@ -156,7 +156,7 @@ class ParticleFilter:
         model given by theta and speed.
 
         particle: the particle we want to update
-        delta_angle: the clockwise change in angle of the car from the previous timestep
+        delta_angle: the clockwise change in angle of the car from the previous timestep, in radians
         speed: the current speed of the car (distance traveled over 1 unit of time)
         returns a new particle
         """
